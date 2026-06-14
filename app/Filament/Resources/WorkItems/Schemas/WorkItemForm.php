@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\WorkItems\Schemas;
 
+use App\Filament\Support\MoneyInput;
+use App\Filament\Support\RelationOptionForms;
+use App\Filament\Support\SelectCreateOption;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -15,12 +18,15 @@ class WorkItemForm
     {
         return $schema
             ->components([
-                Select::make('task_id')
-                    ->relationship('task', 'title')
-                    ->label('Công việc')
-                    ->required()
-                    ->searchable()
-                    ->preload(),
+                SelectCreateOption::inline(
+                    Select::make('task_id')
+                        ->relationship('task', 'title')
+                        ->label('Công việc')
+                        ->required()
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm(RelationOptionForms::task())
+                ),
                 TextInput::make('title')
                     ->required()
                     ->maxLength(255)
@@ -44,9 +50,14 @@ class WorkItemForm
                     ->default(0)
                     ->label('Thứ tự'),
                 DatePicker::make('start_date')
-                    ->label('Ngày bắt đầu'),
+                    ->label('Ngày bắt đầu')
+                    ->displayFormat('d/m/Y')
+                    ->native(false),
                 DatePicker::make('due_date')
-                    ->label('Hạn hoàn thành'),
+                    ->label('Hạn hoàn thành')
+                    ->displayFormat('d/m/Y')
+                    ->native(false)
+                    ->afterOrEqual('start_date'),
                 Repeater::make('goals')
                     ->relationship('goals')
                     ->label('Mục tiêu của đầu việc')
@@ -73,12 +84,16 @@ class WorkItemForm
                             ->label('Chỉ tiêu')
                             ->numeric()
                             ->default(0)
-                            ->required(),
+                            ->required()
+                            ->mask(MoneyInput::mask())
+                            ->stripCharacters(MoneyInput::stripCharacters()),
                         TextInput::make('current_value')
                             ->label('Hiện tại')
                             ->numeric()
                             ->default(0)
-                            ->required(),
+                            ->required()
+                            ->mask(MoneyInput::mask())
+                            ->stripCharacters(MoneyInput::stripCharacters()),
                     ])
                     ->columns(5)
                     ->defaultItems(0)

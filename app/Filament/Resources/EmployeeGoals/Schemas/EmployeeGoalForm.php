@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\EmployeeGoals\Schemas;
 
+use App\Filament\Support\MoneyInput;
+use App\Filament\Support\OrgOptionForms;
+use App\Filament\Support\SelectCreateOption;
 use App\Models\GoalType;
 use App\Models\GoalUnit;
 use Filament\Forms\Components\Select;
@@ -14,16 +17,22 @@ class EmployeeGoalForm
     {
         return $schema
             ->components([
-                Select::make('position_id')
-                    ->relationship('position', 'name')
-                    ->label('Vị trí')
-                    ->searchable()
-                    ->preload(),
-                Select::make('user_id')
-                    ->relationship('user', 'name')
-                    ->label('Nhân viên')
-                    ->searchable()
-                    ->preload(),
+                SelectCreateOption::inline(
+                    Select::make('position_id')
+                        ->relationship('position', 'name')
+                        ->label('Vị trí')
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm(OrgOptionForms::position())
+                ),
+                SelectCreateOption::inline(
+                    Select::make('user_id')
+                        ->relationship('user', 'name')
+                        ->label('Nhân viên')
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm(OrgOptionForms::user())
+                ),
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255)
@@ -52,12 +61,16 @@ class EmployeeGoalForm
                     ->required()
                     ->numeric()
                     ->default(0)
-                    ->label('Định mức'),
+                    ->label('Định mức')
+                    ->mask(MoneyInput::mask())
+                    ->stripCharacters(MoneyInput::stripCharacters()),
                 TextInput::make('current_value')
                     ->required()
                     ->numeric()
                     ->default(0)
-                    ->label('Đã thực hiện'),
+                    ->label('Đã thực hiện')
+                    ->mask(MoneyInput::mask())
+                    ->stripCharacters(MoneyInput::stripCharacters()),
                 TextInput::make('period')
                     ->label('Kỳ')
                     ->maxLength(255)

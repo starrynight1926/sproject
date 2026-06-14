@@ -9,7 +9,7 @@ class TasksByStatusChart extends ChartWidget
 {
     protected ?string $heading = 'Tasks by Status';
 
-    protected static ?int $sort = -2;
+    protected static ?int $sort = -8;
 
     protected function getData(): array
     {

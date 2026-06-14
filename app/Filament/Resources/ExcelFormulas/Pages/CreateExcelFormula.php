@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateExcelFormula extends CreateRecord
 {
     protected static string $resource = ExcelFormulaResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

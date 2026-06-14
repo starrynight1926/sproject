@@ -10,7 +10,7 @@ class ProgressTimelineChart extends ChartWidget
 {
     protected ?string $heading = 'Tiến độ báo cáo theo thời gian';
 
-    protected static ?int $sort = -2;
+    protected static ?int $sort = -7;
 
     protected function getData(): array
     {

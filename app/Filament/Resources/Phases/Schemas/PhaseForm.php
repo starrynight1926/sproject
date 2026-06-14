@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Phases\Schemas;
 
+use App\Filament\Support\RelationOptionForms;
+use App\Filament\Support\SelectCreateOption;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -13,12 +15,15 @@ class PhaseForm
     {
         return $schema
             ->components([
-                Select::make('project_id')
-                    ->relationship('project', 'name')
-                    ->label('Dự án')
-                    ->required()
-                    ->searchable()
-                    ->preload(),
+                SelectCreateOption::inline(
+                    Select::make('project_id')
+                        ->relationship('project', 'name')
+                        ->label('Dự án')
+                        ->required()
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm(RelationOptionForms::project())
+                ),
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255)
@@ -29,9 +34,14 @@ class PhaseForm
                     ->default(0)
                     ->label('Thứ tự'),
                 DatePicker::make('start_date')
-                    ->label('Ngày bắt đầu'),
+                    ->label('Ngày bắt đầu')
+                    ->displayFormat('d/m/Y')
+                    ->native(false),
                 DatePicker::make('end_date')
-                    ->label('Ngày kết thúc'),
+                    ->label('Ngày kết thúc')
+                    ->displayFormat('d/m/Y')
+                    ->native(false)
+                    ->afterOrEqual('start_date'),
             ]);
     }
 }

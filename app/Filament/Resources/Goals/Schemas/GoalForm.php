@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Goals\Schemas;
 
+use App\Filament\Support\MoneyInput;
+use App\Filament\Support\RelationOptionForms;
+use App\Filament\Support\SelectCreateOption;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -26,26 +29,38 @@ class GoalForm
                     ])
                     ->default('target')
                     ->required(),
-                Select::make('project_id')
-                    ->relationship('project', 'name')
-                    ->label('Dự án')
-                    ->searchable()
-                    ->preload(),
-                Select::make('phase_id')
-                    ->relationship('phase', 'name')
-                    ->label('Đợt (Phase)')
-                    ->searchable()
-                    ->preload(),
-                Select::make('task_id')
-                    ->relationship('task', 'title')
-                    ->label('Công việc')
-                    ->searchable()
-                    ->preload(),
-                Select::make('work_item_id')
-                    ->relationship('workItem', 'title')
-                    ->label('Đầu việc')
-                    ->searchable()
-                    ->preload(),
+                SelectCreateOption::inline(
+                    Select::make('project_id')
+                        ->relationship('project', 'name')
+                        ->label('Dự án')
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm(RelationOptionForms::project())
+                ),
+                SelectCreateOption::inline(
+                    Select::make('phase_id')
+                        ->relationship('phase', 'name')
+                        ->label('Đợt (Phase)')
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm(RelationOptionForms::phase())
+                ),
+                SelectCreateOption::inline(
+                    Select::make('task_id')
+                        ->relationship('task', 'title')
+                        ->label('Công việc')
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm(RelationOptionForms::task())
+                ),
+                SelectCreateOption::inline(
+                    Select::make('work_item_id')
+                        ->relationship('workItem', 'title')
+                        ->label('Đầu việc')
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm(RelationOptionForms::workItem())
+                ),
                 Select::make('type')
                     ->options([
                         'money' => 'Money',
@@ -63,13 +78,17 @@ class GoalForm
                     ->numeric()
                     ->default(0)
                     ->label('Target Value')
-                    ->placeholder('100'),
+                    ->placeholder('100')
+                    ->mask(MoneyInput::mask())
+                    ->stripCharacters(MoneyInput::stripCharacters()),
                 TextInput::make('current_value')
                     ->required()
                     ->numeric()
                     ->default(0)
                     ->label('Current Value')
-                    ->placeholder('0'),
+                    ->placeholder('0')
+                    ->mask(MoneyInput::mask())
+                    ->stripCharacters(MoneyInput::stripCharacters()),
             ]);
     }
 }

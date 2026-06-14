@@ -9,7 +9,7 @@ class GoalProgressChart extends ChartWidget
 {
     protected ?string $heading = 'Goal Progress';
 
-    protected static ?int $sort = -1;
+    protected static ?int $sort = -6;
 
     protected function getData(): array
     {

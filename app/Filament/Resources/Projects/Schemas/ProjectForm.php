@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Projects\Schemas;
 
+use App\Filament\Support\MoneyInput;
+use App\Filament\Support\OrgOptionForms;
+use App\Filament\Support\SelectCreateOption;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -18,11 +21,14 @@ class ProjectForm
                     ->required()
                     ->maxLength(255)
                     ->placeholder('Tên dự án'),
-                Select::make('owner_id')
-                    ->relationship('owner', 'name')
-                    ->required()
-                    ->searchable()
-                    ->preload(),
+                SelectCreateOption::inline(
+                    Select::make('owner_id')
+                        ->relationship('owner', 'name')
+                        ->required()
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm(OrgOptionForms::user())
+                ),
                 Textarea::make('description')
                     ->columnSpanFull()
                     ->rows(3)
@@ -36,12 +42,15 @@ class ProjectForm
                     ->default('active')
                     ->required(),
                 DatePicker::make('deadline')
-                    ->displayFormat('d/m/Y'),
+                    ->displayFormat('d/m/Y')
+                    ->native(false),
                 TextInput::make('budget')
                     ->label('Tổng ngân sách')
                     ->numeric()
                     ->default(0)
-                    ->prefix('₫'),
+                    ->prefix('₫')
+                    ->mask(MoneyInput::mask())
+                    ->stripCharacters(MoneyInput::stripCharacters()),
             ]);
     }
 }

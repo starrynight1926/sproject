@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Allocations\Schemas;
 
+use App\Filament\Support\MoneyInput;
+use App\Filament\Support\OrgOptionForms;
+use App\Filament\Support\SelectCreateOption;
 use App\Models\Allocation;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
@@ -19,7 +21,7 @@ class AllocationForm
             ->columns(1)
             ->components([
                 Section::make('Phạm vi phân bổ')
-                    ->description('Chọn dự án và đối tượng được nhận phân bổ (phòng ban, hoặc vị trí/nhân sự thuộc một phòng ban đã phân bổ).')
+                    ->description('Chọn dự án và phòng ban được nhận phân bổ. Có thể chọn thêm vị trí/nhân sự cụ thể trong phòng ban đó nếu cần.')
                     ->icon(Heroicon::OutlinedShare)
                     ->columns(2)
                     ->components([
@@ -29,52 +31,36 @@ class AllocationForm
                             ->required()
                             ->searchable()
                             ->preload()
-                            ->native(false)
-                            ->live()
-                            ->afterStateUpdated(fn (callable $set) => $set('parent_id', null)),
-                        Select::make('parent_id')
-                            ->label('Thuộc phân bổ phòng ban')
-                            ->options(function (Get $get) {
-                                $projectId = $get('project_id');
-
-                                if (! $projectId) {
-                                    return [];
-                                }
-
-                                return Allocation::query()
-                                    ->where('project_id', $projectId)
-                                    ->whereNull('parent_id')
-                                    ->with('orgUnit')
-                                    ->get()
-                                    ->mapWithKeys(fn (Allocation $allocation) => [
-                                        $allocation->id => $allocation->orgUnit?->name ?? "#{$allocation->id}",
-                                    ]);
-                            })
-                            ->searchable()
-                            ->preload()
-                            ->native(false)
-                            ->placeholder('— Phân bổ cấp phòng ban —')
-                            ->helperText('Chỉ chọn khi chia tiếp xuống vị trí/nhân sự trong phòng ban.'),
-                        Select::make('org_unit_id')
-                            ->label('Phòng ban')
-                            ->relationship('orgUnit', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->native(false)
-                            ->live()
-                            ->columnSpanFull(),
-                        Select::make('position_id')
-                            ->label('Vị trí')
-                            ->relationship('position', 'name')
-                            ->searchable()
-                            ->preload()
                             ->native(false),
-                        Select::make('user_id')
-                            ->label('Nhân sự')
-                            ->relationship('user', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->native(false),
+                        SelectCreateOption::inline(
+                            Select::make('org_unit_id')
+                                ->label('Phòng ban')
+                                ->relationship('orgUnit', 'name')
+                                ->options(fn () => OrgOptionForms::orgUnitOptions())
+                                ->getOptionLabelFromRecordUsing(fn ($record) => OrgOptionForms::orgUnitOptions()[$record->id] ?? $record->name)
+                                ->searchable()
+                                ->preload()
+                                ->native(false)
+                                ->createOptionForm(OrgOptionForms::orgUnit())
+                        ),
+                        SelectCreateOption::inline(
+                            Select::make('position_id')
+                                ->label('Vị trí')
+                                ->relationship('position', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->native(false)
+                                ->createOptionForm(OrgOptionForms::position())
+                        ),
+                        SelectCreateOption::inline(
+                            Select::make('user_id')
+                                ->label('Nhân sự')
+                                ->relationship('user', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->native(false)
+                                ->createOptionForm(OrgOptionForms::user())
+                        ),
                     ]),
                 Section::make('Chỉ tiêu phân bổ')
                     ->description('Nhập số liệu phân bổ cho đối tượng đã chọn ở trên. Có thể nhập vượt mức để theo dõi/điều chỉnh.')
@@ -85,7 +71,9 @@ class AllocationForm
                             ->label('Mục tiêu')
                             ->numeric()
                             ->default(0)
-                            ->minValue(0),
+                            ->minValue(0)
+                            ->mask(MoneyInput::mask())
+                            ->stripCharacters(MoneyInput::stripCharacters()),
                         TextInput::make('staff_count')
                             ->label('Nhân sự')
                             ->numeric()
@@ -98,6 +86,8 @@ class AllocationForm
                             ->default(0)
                             ->minValue(0)
                             ->prefix('₫')
+                            ->mask(MoneyInput::mask())
+                            ->stripCharacters(MoneyInput::stripCharacters())
                             ->helperText('% so với tổng ngân sách dự án sẽ tự tính.'),
                     ]),
                 Section::make('Ghi chú')

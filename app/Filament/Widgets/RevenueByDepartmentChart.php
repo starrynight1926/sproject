@@ -10,7 +10,7 @@ class RevenueByDepartmentChart extends ChartWidget
 {
     protected ?string $heading = 'Doanh thu theo công việc (Kế hoạch vs Thực tế)';
 
-    protected static ?int $sort = -4;
+    protected static ?int $sort = -5;
 
     protected function getData(): array
     {

@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Tasks\Schemas;
 
+use App\Filament\Support\OrgOptionForms;
+use App\Filament\Support\RelationOptionForms;
+use App\Filament\Support\SelectCreateOption;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -19,16 +22,22 @@ class TaskForm
                     ->maxLength(255)
                     ->columnSpanFull()
                     ->placeholder('Tên task'),
-                Select::make('project_id')
-                    ->relationship('project', 'name')
-                    ->required()
-                    ->searchable()
-                    ->preload(),
-                Select::make('goal_id')
-                    ->relationship('goal', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->placeholder('Không gắn goal'),
+                SelectCreateOption::inline(
+                    Select::make('project_id')
+                        ->relationship('project', 'name')
+                        ->required()
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm(RelationOptionForms::project())
+                ),
+                SelectCreateOption::inline(
+                    Select::make('goal_id')
+                        ->relationship('goal', 'name')
+                        ->searchable()
+                        ->preload()
+                        ->placeholder('Không gắn goal')
+                        ->createOptionForm(RelationOptionForms::goal())
+                ),
                 Select::make('status')
                     ->options([
                         'idea' => 'Idea',
@@ -52,15 +61,21 @@ class TaskForm
                     ->rows(3)
                     ->placeholder('Mô tả task...'),
                 DatePicker::make('start_date')
-                    ->displayFormat('d/m/Y'),
+                    ->displayFormat('d/m/Y')
+                    ->native(false),
                 DatePicker::make('due_date')
-                    ->displayFormat('d/m/Y'),
-                Select::make('assignees')
-                    ->relationship('assignees', 'name')
-                    ->multiple()
-                    ->searchable()
-                    ->preload()
-                    ->columnSpanFull(),
+                    ->displayFormat('d/m/Y')
+                    ->native(false)
+                    ->afterOrEqual('start_date'),
+                SelectCreateOption::inline(
+                    Select::make('assignees')
+                        ->relationship('assignees', 'name')
+                        ->multiple()
+                        ->searchable()
+                        ->preload()
+                        ->columnSpanFull()
+                        ->createOptionForm(OrgOptionForms::user())
+                ),
                 TextInput::make('sort_order')
                     ->numeric()
                     ->default(0),

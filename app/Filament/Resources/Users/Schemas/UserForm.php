@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Filament\Support\OrgOptionForms;
+use App\Filament\Support\SelectCreateOption;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -31,16 +33,24 @@ class UserForm
                     ->dehydrated(fn (?string $state) => filled($state))
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->maxLength(255),
-                Select::make('org_unit_id')
-                    ->relationship('orgUnit', 'name')
-                    ->label('Phòng ban')
-                    ->searchable()
-                    ->preload(),
-                Select::make('position_id')
-                    ->relationship('position', 'name')
-                    ->label('Vị trí')
-                    ->searchable()
-                    ->preload(),
+                SelectCreateOption::inline(
+                    Select::make('org_unit_id')
+                        ->relationship('orgUnit', 'name')
+                        ->label('Phòng ban')
+                        ->options(fn () => OrgOptionForms::orgUnitOptions())
+                        ->getOptionLabelFromRecordUsing(fn ($record) => OrgOptionForms::orgUnitOptions()[$record->id] ?? $record->name)
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm(OrgOptionForms::orgUnit())
+                ),
+                SelectCreateOption::inline(
+                    Select::make('position_id')
+                        ->relationship('position', 'name')
+                        ->label('Vị trí')
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm(OrgOptionForms::position())
+                ),
             ]);
     }
 }

@@ -31,6 +31,8 @@ class ReportsRelationManager extends RelationManager
                     ->default(fn () => Auth::id()),
                 DatePicker::make('report_date')
                     ->label('Ngày báo cáo')
+                    ->displayFormat('d/m/Y')
+                    ->native(false)
                     ->required()
                     ->default(now()),
                 TextInput::make('progress_value')

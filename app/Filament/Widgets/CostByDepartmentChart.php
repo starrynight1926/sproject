@@ -10,7 +10,7 @@ class CostByDepartmentChart extends ChartWidget
 {
     protected ?string $heading = 'Chi phí theo công việc (Kế hoạch vs Thực tế)';
 
-    protected static ?int $sort = -3;
+    protected static ?int $sort = -4;
 
     protected function getData(): array
     {

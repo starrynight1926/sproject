@@ -9,7 +9,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class ProjectKpiOverview extends BaseWidget
 {
-    protected static ?int $sort = -5;
+    protected static ?int $sort = -9;
 
     protected function getStats(): array
     {

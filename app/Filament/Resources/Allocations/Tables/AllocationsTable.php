@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Allocations\Tables;
 
+use App\Filament\Support\OrgOptionForms;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -57,7 +58,7 @@ class AllocationsTable
                     ->relationship('project', 'name'),
                 SelectFilter::make('org_unit_id')
                     ->label('Phòng ban')
-                    ->relationship('orgUnit', 'name'),
+                    ->options(fn () => OrgOptionForms::orgUnitOptions()),
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([

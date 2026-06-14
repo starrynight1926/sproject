@@ -11,9 +11,10 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\HtmlString;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -33,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::hex('#22d3a0'),
                 'gray' => Color::Slate,
             ])
-            ->darkMode(isForced: true)
+            ->darkMode()
             ->font('Inter')
             ->brandName('S ProjectManage')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
@@ -53,10 +54,14 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Khác'),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
-            ])
+            ->renderHook(
+                PanelsRenderHook::FOOTER,
+                fn (): HtmlString => new HtmlString(
+                    '<div class="px-4 pb-4 text-gray-400 dark:text-gray-500 text-center" style="font-size: 11px;">'
+                    .'Welcome, '.e(Auth::user()?->name).' · Filament '.\Composer\InstalledVersions::getPrettyVersion('filament/filament')
+                    .'</div>'
+                ),
+            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
